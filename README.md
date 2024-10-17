@@ -16,3 +16,17 @@ This project builds a model that, given a non-positive matrix that's contain the
 - **Data generation:** Scripts to generate valid and invalid sets of k-body marginals from known global quantum states.
 - **Model training:** A machine learning model based on neural networks that relates "incompatible" matrices with "compatible" ones.
 - **Evaluation and results:** Tools for evaluating the performance of the model, including fidelity and visualizations.
+
+### BibTex 
+
+```
+@misc{arXiv:2410.11145,
+      title={Machine Learning approach to reconstruct Density Matrices from Quantum Marginals}, 
+      author={Daniel Uzcategui-Contreras and Antonio Guerra and Sebastian Niklitschek and Aldo Delgado},
+      year={2024},
+      eprint={2410.11145},
+      archivePrefix={arXiv},
+      primaryClass={quant-ph},
+      url={https://arxiv.org/abs/2410.11145}, 
+}
+```
