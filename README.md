@@ -4,7 +4,7 @@
 
 # Machine Learning approach to reconstruct Density Matrices from Quantum Marginals
 
-[arXiv:2410.11145](arXiv:2410.11145)
+[arXiv:2410.11145](https://doi.org/10.48550/arXiv.2410.11145)
 
 
 This repository presents a machine learning approach to address the **Quantum Marginals Problem**—a key question in quantum information theory and many-body physics. The problem revolves around determining a global system troughthout a set of reduced density matrices, describing subsystems of a quantum system.
