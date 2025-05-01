@@ -35,7 +35,7 @@ num_of_samples = args.num_samples
 SCALE = args.scale
 
 
-cases = [(3,2),(4,2),(5,2),(6,3)]
+cases = [(3,2),(4,2),(5,2),(6,3),(7,4),(8,4)]
 d = 2
 
 with h5py.File('running_times.h5', 'w') as f:
@@ -50,6 +50,7 @@ def benchmarking(cases):
 
         success_rates = {'mio_cdae':0, 'mio_cdae_mio':0, 'sdp':0}
         fidelities = {'mio_cdae':[], 'mio_cdae_mio':[], 'sdp':[]}
+        # dn = d**N
         checkpoints_path = f"/home/danuzco/response_to_referees/sdp_comparison/checkpoints/cpN{N}k{N-1}v0"
 
         model_num_of_channels = {'encoder_in_channels_0':2, 
