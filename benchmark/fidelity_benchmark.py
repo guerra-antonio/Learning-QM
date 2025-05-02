@@ -29,7 +29,8 @@ apply_extra_mio = args.extra_mio
 
 print(apply_extra_mio)
 
-cases = [(4,2),(4,3),(5,4),(5,3),(6,4),(6,5),(7,6),(8,7)]
+# cases = [(4,2),(4,3),(5,4),(5,3),(6,4),(6,5),(7,6),(8,7)]
+cases = [(4,2),(4,3),(5,3)]
 
 model_num_of_channels = {'encoder_in_channels_0':2, 
                         'encoder_out_channels_0':100,
