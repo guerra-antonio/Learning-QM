@@ -29,8 +29,8 @@ apply_extra_mio = args.extra_mio
 
 print(apply_extra_mio)
 
-# cases = [(4,2),(4,3),(5,4),(5,3),(6,4),(6,5),(7,6),(8,7)]
-cases = [(4,2),(4,3),(5,3)]
+cases = [(4,2),(4,3),(5,4),(5,3),(6,4),(6,5),(7,6),(8,7)]
+# cases = [(3,2),(4,2),(5,2),(6,3)]
 
 model_num_of_channels = {'encoder_in_channels_0':2, 
                         'encoder_out_channels_0':100,
@@ -55,7 +55,8 @@ for N,k_marginals in cases:
     success_rate = {}
 
     checkpoints_path = f"./checkpoints/cpN{N}k{N-1}v0"
-    print(f"N: {N}, k: {N-1}", checkpoints_path)
+    # checkpoints_path = f"./checkpoints/cpoint_v0_N{N}_3_d2N{N}k{N-1}"
+    print(f"N: {N}, k: {k_marginals}", checkpoints_path)
 
     model = ConvDenoiser(model_num_of_channels)
     model_params = torch.load(checkpoints_path, map_location=torch.device('cpu'), weights_only=True)
@@ -98,7 +99,7 @@ for N,k_marginals in cases:
                 
                 data_model[k_marginals][rank].append( np.mean(sample_mean_fidelity) )
             else:
-                data_model[k_marginals][rank].append( pd.NA )
+                data_model[k_marginals][rank].append( 'nan' )
 
             ################################### random guessing ################################################
             

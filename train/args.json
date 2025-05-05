@@ -1,11 +1,11 @@
 {
-    "filenames": ["data32_20000003body_2parts_d2_22Mar2025"],
+    "filenames": ["data32_10000004body_3parts_d2_2May2025"],
     "numepochs": 1000,
     "batchsize": 100,
-    "N": 3,
-    "k": 2,
+    "N": 4,
+    "k": 3,
     "lr": 1e-4,
-    "comment": "_v0_N3_3_",
+    "comment": "_v0_N4_3_",
     "data_fraction":1,
     "scale": 10
 }

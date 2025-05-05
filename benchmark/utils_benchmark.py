@@ -569,12 +569,12 @@ class PlotData:
         self.ls = linestyle
 
 
-def plot_std(args,ylims=[0.9,1.002],xlims=[1, 10],pathplot="",legen_loc='center right',xlabel='rank', transparent = True):
+def plot_std(ax,args,ylims=[0.9,1.002],xlims=[1, 10],pathplot="",legen_loc='center right',xlabel='rank', transparent = True):
 
     plt.style.use('seaborn-v0_8-whitegrid')
-    plt.figure(figsize=(7,2.6))
+
     for k in args:
-        plt.plot(np.array(k.data.columns), k.data.describe().loc['mean'],
+        ax.plot(np.array(k.data.columns), k.data.describe().loc['mean'],
                 marker=k.marker,
                 label=k.name,
                 color=k.color,
@@ -583,22 +583,23 @@ def plot_std(args,ylims=[0.9,1.002],xlims=[1, 10],pathplot="",legen_loc='center 
                 markersize = 5
                 )
     
-        plt.fill_between(np.array(k.data.columns),
+        ax.fill_between(np.array(k.data.columns),
                         (k.data.describe().loc['mean'] - k.data.describe().loc['std']),
                         (k.data.describe().loc['mean'] + k.data.describe().loc['std']),
                         color=k.color, alpha=0.15)
     
     if len(xlabel)>0:
-        plt.xlabel(xlabel, fontsize=13)
-    plt.ylabel("Fidelity", fontsize=13)
-    plt.legend(loc=legen_loc, fontsize=12)
-    plt.ylim(ylims[0],ylims[1])
-    plt.xlim(xlims[0],xlims[1])
-    plt.xticks(args[0].data.columns,args[0].data.columns,fontsize=13)
-    plt.yticks(fontsize=13)
+        ax.set_xlabel(xlabel, fontsize=13)
+    ax.set_ylabel("Fidelity", fontsize=13)
+    ax.legend(loc=legen_loc, fontsize=12)
+    ax.set_ylim(ylims[0],ylims[1])
+    ax.set_xlim(xlims[0],xlims[1])
+    # ax.set_xticks(args[0].data.columns,args[0].data.columns,fontsize=13)
+    # ax.set_yticks(fontsize=13)
     if len(pathplot)>0:
         plt.savefig(pathplot, bbox_inches='tight', transparent=transparent)
-    plt.show()
+    
+    return ax
 
 
 def plot_medians(data_sets,ylims=[0.9,1.002],xlims=[1, 10],title="",legen_loc='center right',xlabel='rank'):

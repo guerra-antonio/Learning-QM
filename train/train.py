@@ -127,11 +127,11 @@ model = ConvDenoiser()
 
 ##########  transfer learning   ################
 
-#model_params = torch.load("./checkpoints/cpoint_v0_N5_2_d2N5k4", weights_only=True)
-#model.load_state_dict(model_params['model_state_dict'])
+model_params = torch.load("./tl_checkpoints/cpoint_v0_N3_3_d2N3k2", weights_only=True)
+model.load_state_dict(model_params['model_state_dict'])
 
-#for name, params in model.encoder.named_parameters():
-#    params.requires_grad = False
+for name, params in model.encoder.named_parameters():
+    params.requires_grad = False
 
 #for name, params in model.decoder.named_parameters():
 #    params.requires_grad = False

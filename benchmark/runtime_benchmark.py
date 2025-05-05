@@ -35,10 +35,12 @@ num_of_samples = args.num_samples
 SCALE = args.scale
 
 
-cases = [(3,2),(4,2),(5,2),(6,3),(7,4),(8,4)]
+cases = [(3,2),(4,2),(5,2),(6,3)]
 d = 2
 
-with h5py.File('running_times.h5', 'w') as f:
+saving_filename = 'runtimes.h5'
+
+with h5py.File(saving_filename, 'w') as f:
     for key in ['mio_cdae', 'mio_cdae_mio', 'sdp']:
         for N,k in cases:
             f.create_dataset(f"{key}/N{N}k{k}", (num_of_samples,))
@@ -46,14 +48,7 @@ with h5py.File('running_times.h5', 'w') as f:
 
 def benchmarking(cases):
 
-    for N,k in cases:
-
-        success_rates = {'mio_cdae':0, 'mio_cdae_mio':0, 'sdp':0}
-        fidelities = {'mio_cdae':[], 'mio_cdae_mio':[], 'sdp':[]}
-        # dn = d**N
-        checkpoints_path = f"/home/danuzco/response_to_referees/sdp_comparison/checkpoints/cpN{N}k{N-1}v0"
-
-        model_num_of_channels = {'encoder_in_channels_0':2, 
+    model_num_of_channels = {'encoder_in_channels_0':2, 
                             'encoder_out_channels_0':SCALE*10,
                             'encoder_out_channels_1':SCALE*10,
                             'encoder_out_channels_2':SCALE*10,
@@ -61,9 +56,15 @@ def benchmarking(cases):
                             'decoder_out_channels_1':SCALE*10,
                             'decoder_out_channels_2':SCALE*10,
                             }
-        
+
+    for N,k in cases:
+
+        success_rates = {'mio_cdae':0, 'mio_cdae_mio':0, 'sdp':0}
+        fidelities = {'mio_cdae':[], 'mio_cdae_mio':[], 'sdp':[]}
+        checkpoints_path = f"./checkpoints/cpN{N}k{N-1}v0"
+
         model = ConvDenoiser(model_num_of_channels).to(device)
-        model_params = torch.load(checkpoints_path, map_location=torch.device('cpu'), weights_only=True)
+        model_params = torch.load(checkpoints_path, map_location=torch.device(device), weights_only=True)
         model.load_state_dict(model_params['model_state_dict'])
         
 
@@ -73,10 +74,10 @@ def benchmarking(cases):
             marginals = get_marginals(rho_generator, d, N, labels_marginals)
 
             # model
-            with h5py.File('running_times.h5', 'a') as f:
-                t0_model = time.time()
+            with h5py.File(saving_filename, 'a') as f:
+                t0_mio_cade = time.time()
                 predicted_state_mio_cade  = mio_cdae( d, N, marginals, model, device )
-                f[f'mio_cdae/N{N}k{k}'][i] = time.time() - t0_model
+                f[f'mio_cdae/N{N}k{k}'][i] = time.time() - t0_mio_cade
                 predicted_marginals_mio_cade = get_marginals(predicted_state_mio_cade, d, N, labels_marginals)
 
                 eigenvals_mio_cade = np.linalg.eigvalsh(predicted_state_mio_cade)
@@ -85,16 +86,14 @@ def benchmarking(cases):
                     success_rates['mio_cdae'] += 1
                     for a,b in zip(marginals.values(), predicted_marginals_mio_cade.values()):
                         fidelities['mio_cdae'].append(qi.state_fidelity(a,b, validate=True))
-                # print(f'Average fidelity mio_cade {avg_fidelity/len(marginals.values())}')
 
             #model with second mio
-            with h5py.File('running_times.h5', 'a') as f:
-                t0_compiled_model = time.time()
+            with h5py.File(saving_filename, 'a') as f:
+                t0__mio_cade_mio = time.time()
                 predicted_state_mio_cade_mio = mio_cdae_mio( d, N, marginals, model, device )
-                f[f'mio_cdae_mio/N{N}k{k}'][i] = time.time() - t0_compiled_model
+                f[f'mio_cdae_mio/N{N}k{k}'][i] = time.time() - t0__mio_cade_mio
                 predicted_marginals_mio_cade_mio = get_marginals(predicted_state_mio_cade_mio, d, N, labels_marginals)
                 
-                # print(f'Average fidelity mio_cade_mio {avg_fidelity/len(marginals.values())}')
                 eigenvals_mio_cade_mio = np.linalg.eigvalsh(predicted_state_mio_cade_mio)
                 eigenvals_mio_cade_mio[abs(eigenvals_mio_cade_mio) < 1e-10] = 0
                 if np.all(eigenvals_mio_cade_mio >= 0):
@@ -104,7 +103,7 @@ def benchmarking(cases):
 
             # sdp
             if N < 8:
-                with h5py.File('running_times.h5', 'a') as f:
+                with h5py.File(saving_filename, 'a') as f:
                     t0_sdp = time.time()
                     try:
                         predicted_state_SDP  = sdp_solver(marginals, N, solver = cp.SCS, max_iters = 2000)
@@ -118,7 +117,6 @@ def benchmarking(cases):
                             for a,b in zip(marginals.values(), predicted_marginals_SDP.values()):
                                 fidelities['sdp'].append(qi.state_fidelity(a,b, validate=True))
 
-                        # print(f'Average fidelity sdp {avg_fidelity/len(marginals.values())}')
                     except Exception as e:
                         print(f"Exception {e}")
                         f[f'sdp/N{N}k{k}'][i] = np.nan
@@ -127,10 +125,11 @@ def benchmarking(cases):
 
         
         for key in success_rates.keys():
-            avg_fidelity = sum(fidelities[key])/len(fidelities[key])
-            print(f'Avg fidelity {key}: {avg_fidelity}, succes rate {success_rates[key]/num_of_samples}')
-
-
+            try:
+                avg_fidelity = sum(fidelities[key])/len(fidelities[key])
+                print(f'Avg fidelity {key}: {avg_fidelity}, succes rate {success_rates[key]/num_of_samples}')
+            except:
+                pass
 
 
 benchmarking(cases)
