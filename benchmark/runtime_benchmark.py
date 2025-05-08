@@ -35,7 +35,7 @@ num_of_samples = args.num_samples
 SCALE = args.scale
 
 
-cases = [(3,2),(4,2),(5,2),(6,3)]
+cases = [(3,2),(4,2),(5,2),(6,3),(7,4),(8,4)]
 d = 2
 
 saving_filename = 'runtimes.h5'
@@ -46,7 +46,7 @@ with h5py.File(saving_filename, 'w') as f:
             f.create_dataset(f"{key}/N{N}k{k}", (num_of_samples,))
 
 
-def benchmarking(cases):
+def benchmarking(cases, num_of_samples):
 
     model_num_of_channels = {'encoder_in_channels_0':2, 
                             'encoder_out_channels_0':SCALE*10,
@@ -67,8 +67,12 @@ def benchmarking(cases):
         model_params = torch.load(checkpoints_path, map_location=torch.device(device), weights_only=True)
         model.load_state_dict(model_params['model_state_dict'])
         
+        if N > 5:
+            num_of_samples_case = 10
+        else:
+            num_of_samples_case = num_of_samples
 
-        for i in range(num_of_samples):
+        for i in range(num_of_samples_case):
             rho_generator = qi.random_density_matrix(dims=[d]*N).data
             labels_marginals = list(itertools.combinations( range( N) , r = k))  
             marginals = get_marginals(rho_generator, d, N, labels_marginals)
@@ -126,10 +130,11 @@ def benchmarking(cases):
         
         for key in success_rates.keys():
             try:
+                success_rates[key] = success_rates[key]/num_of_samples_case
                 avg_fidelity = sum(fidelities[key])/len(fidelities[key])
-                print(f'Avg fidelity {key}: {avg_fidelity}, succes rate {success_rates[key]/num_of_samples}')
+                print(f'Avg fidelity {key}: {avg_fidelity}, succes rate {success_rates[key]}')
             except:
                 pass
 
 
-benchmarking(cases)
+benchmarking(cases, num_of_samples)
