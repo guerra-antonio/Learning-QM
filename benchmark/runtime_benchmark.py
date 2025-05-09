@@ -67,7 +67,9 @@ def benchmarking(cases, num_of_samples):
         model_params = torch.load(checkpoints_path, map_location=torch.device(device), weights_only=True)
         model.load_state_dict(model_params['model_state_dict'])
         
-        if N > 5:
+        if N == 6:
+            num_of_samples_case = 100
+        elif N > 6:
             num_of_samples_case = 10
         else:
             num_of_samples_case = num_of_samples
