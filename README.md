@@ -1,5 +1,5 @@
 # Machine Learning approach to reconstruct Density Matrices from Quantum Marginals
-[link](https://iopscience.iop.org/article/10.1088/2632-2153/ade48d)
+[![DOI](https://img.shields.io/badge/DOI-10.1088%2F2632--2153%2Fade48d-blue)](https://iopscience.iop.org/article/10.1088/2632-2153/ade48d)
 
 This repository presents a machine learning approach to address the **Quantum Marginals Problem**—a key question in quantum information theory and many-body physics. The problem revolves around determining a global system troughthout a set of reduced density matrices, describing subsystems of a quantum system.
 
