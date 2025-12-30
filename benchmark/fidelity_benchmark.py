@@ -89,6 +89,8 @@ for N,k_marginals in cases:
                 predicted_state_np_model = mio_cdae(d,N,target_marginals,model,device)
 
             predicted_eigenvals = np.linalg.eigvalsh( predicted_state_np_model )
+            predicted_eigenvals[predicted_eigenvals < -1e-10] = 0
+            predicted_state_np_model = predicted_state_np_model/np.trace(predicted_state_np_model)
 
             if np.all( predicted_eigenvals >= 0 ):
                 num_of_succeses_model += 1

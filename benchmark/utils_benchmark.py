@@ -516,7 +516,25 @@ def get_state_of_rank(rank, d, num_of_qudits):
     rho = rho.data
 
     return rho / np.trace(rho)
-    
+
+
+def model_wrapper(model, rho_noisy,device):
+
+    tensor_rho_noisy = torch.Tensor( np.stack((rho_noisy.real, rho_noisy.imag)) ).to(device)
+    tensor_rho_noisy = tensor_rho_noisy.to(torch.float32)
+    output = model( tensor_rho_noisy )
+    output = output.cpu()
+
+    predicted_state = output[0] + 1j*output[1]
+    predicted_state = (predicted_state + torch.conj(predicted_state.T))/2
+
+    predicted_state = output[0] + 1j*output[1]
+    predicted_state = (predicted_state + torch.conj(predicted_state.T))/2
+
+    predicted_state_np = predicted_state.detach().numpy()
+
+    return predicted_state_np/np.trace(predicted_state_np)
+
 
 def mio_cdae(d,num_of_qubits, input_marginals, trained_model, device):
 
@@ -530,23 +548,24 @@ def mio_cdae(d,num_of_qubits, input_marginals, trained_model, device):
                 swapper_d
                 )
     
-    tensor_rho_noisy = torch.Tensor( np.stack((rho_noisy.real, rho_noisy.imag)) ).to(device)
-    tensor_rho_noisy = tensor_rho_noisy.to(torch.float32)
-    output = trained_model( tensor_rho_noisy )
-    output = output.cpu()
+    predicted_state_np = model_wrapper(trained_model, rho_noisy, device)
+    # tensor_rho_noisy = torch.Tensor( np.stack((rho_noisy.real, rho_noisy.imag)) ).to(device)
+    # tensor_rho_noisy = tensor_rho_noisy.to(torch.float32)
+    # output = trained_model( tensor_rho_noisy )
+    # output = output.cpu()
     
-    predicted_state = output[0] + 1j*output[1]
-    predicted_state = (predicted_state + torch.conj(predicted_state.T))/2
+    # predicted_state = output[0] + 1j*output[1]
+    # predicted_state = (predicted_state + torch.conj(predicted_state.T))/2
 
-    predicted_state_np = predicted_state.detach().numpy()
+    # predicted_state_np = predicted_state.detach().numpy()
     
-    return predicted_state_np/np.trace(predicted_state_np)
+    return rho_noisy, predicted_state_np
 
 
 
 def mio_cdae_mio(d,num_of_qubits, input_marginals, trained_model, device):
 
-    predicted_state_np = mio_cdae(d,num_of_qubits, input_marginals, trained_model, device)
+    rho_noisy,predicted_state_np = mio_cdae(d,num_of_qubits, input_marginals, trained_model, device)
     swapper_d = swapper(d)
 
     predicted_by_second_mio = physical_imposition_operator(d,num_of_qubits,
@@ -555,7 +574,7 @@ def mio_cdae_mio(d,num_of_qubits, input_marginals, trained_model, device):
                 swapper_d
                 )
     
-    return predicted_by_second_mio/np.trace(predicted_by_second_mio)
+    return rho_noisy, predicted_by_second_mio/np.trace(predicted_by_second_mio)
 
 
 
@@ -571,7 +590,7 @@ class PlotData:
 
 def plot_std(ax,args,ylims=[0.9,1.002],xlims=[1, 10],pathplot="",legen_loc='center right',xlabel='rank', transparent = True):
 
-    plt.style.use('seaborn-v0_8-whitegrid')
+    # plt.style.use('seaborn-v0_8-whitegrid')
 
     for k in args:
         ax.plot(np.array(k.data.columns), k.data.describe().loc['mean'],
@@ -579,8 +598,8 @@ def plot_std(ax,args,ylims=[0.9,1.002],xlims=[1, 10],pathplot="",legen_loc='cent
                 label=k.name,
                 color=k.color,
                 linestyle = k.ls,
-                linewidth = 1.,
-                markersize = 5
+                linewidth = 1.2,
+                markersize = 2.9
                 )
     
         ax.fill_between(np.array(k.data.columns),
@@ -589,9 +608,9 @@ def plot_std(ax,args,ylims=[0.9,1.002],xlims=[1, 10],pathplot="",legen_loc='cent
                         color=k.color, alpha=0.15)
     
     if len(xlabel)>0:
-        ax.set_xlabel(xlabel, fontsize=13)
-    ax.set_ylabel("Fidelity", fontsize=13)
-    ax.legend(loc=legen_loc, fontsize=12)
+        ax.set_xlabel(xlabel, fontsize=10)
+    # ax.set_ylabel("Fidelity", fontsize=10)
+    # ax.legend(loc=legen_loc, fontsize=9)
     ax.set_ylim(ylims[0],ylims[1])
     ax.set_xlim(xlims[0],xlims[1])
     # ax.set_xticks(args[0].data.columns,args[0].data.columns,fontsize=13)
